@@ -1,0 +1,28 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: reggie_take_out
+  datasource:
+    druid:
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      url: jdbc:mysql://localhost:3306/reggie?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
+      username: root
+      password: yc12138**
+  main:
+    banner-mode: off  # 取消springboot的log
+mybatis-plus:
+  configuration:
+    #在映射实体或者属性时（这两种都会用到），将数据库中表名和字段名中的下划线去掉，按照驼峰命名法映射
+    # 就是说以下true使得mybatisplus可以实现将数据库中的表和实体类对应起来：address_book表名  ---> AdderssBook实体类
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      id-type: ASSIGN_ID
+    banner: false  # 设定springboot的标识不显示
+
+# 文件上传的根目录
+reggie:
+  path: E:\IDEA\IdeaProjects\waimaipic
+
