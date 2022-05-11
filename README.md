@@ -1,2 +1,0 @@
-# reggie
-Java spring boot
