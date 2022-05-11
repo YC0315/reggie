@@ -79,7 +79,7 @@ public class SetmealController {
             BeanUtils.copyProperties(item, setmealDto);
             // 获得菜品对应的id
             Long cateGoryId = item.getCategoryId();
-            // 调用cateGory逻辑层的方法获得一个分类对象!!根据id获得一个对象
+            // 调用cateGory逻辑层的方法获得一个分类对象!!根据id获得一个对象。
             Category category = categoryService.getById(cateGoryId);
             if(category != null){
                 String categoryName = category.getName();
