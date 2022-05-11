@@ -13,6 +13,9 @@ import com.itheima.reggie.service.SetmealService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,13 +31,22 @@ public class SetmealController {
 
     @Autowired
     private SetmealDishService setmealDishService;
+
     @Autowired
     private CategoryService categoryService;
 
+    //springcache的注解
+    @Autowired
+    private CacheManager cacheManager;
+
+
     // 新增套餐
     @PostMapping  // 不要忘了加@RequestBody
-    public Result<String> save(@RequestBody SetmealDto setmealDto){  // 因为请求的参数不只是包含setmeal的属性，因此参数类型不能使用setmeal实体，要用一个扩展类，它继承setmeal并且有额外的属性
 
+    // 当新增套餐时，需要将缓存数据一块清理掉,否则会使缓存和数据库中的数据不一致。value = "setmealCache"就是指我要删除的是setmealCache这个分类下面的缓存
+    // allEntries = true表示要删除setmealCache这个分类下面的所有缓存数据
+    @CacheEvict(value = "setmealCache", allEntries = true)
+    public Result<String> save(@RequestBody SetmealDto setmealDto){  // 因为请求的参数不只是包含setmeal的属性，因此参数类型不能使用setmeal实体，要用一个扩展类，它继承setmeal并且有额外的属性
         setmealService.saveWithDish(setmealDto);
         return Result.success("添加套餐成功！");
     }
@@ -83,6 +95,9 @@ public class SetmealController {
 
     // 删除套餐
     @DeleteMapping
+    // 当删除套餐时，需要将缓存数据一块清理掉,value = "setmealCache"就是指我要删除的是setmealCache这个分类下面的缓存
+    // allEntries = true表示要删除setmealCache这个分类下面的所有缓存数据
+    @CacheEvict(value = "setmealCache", allEntries = true)
     public Result<String> delete(@RequestParam List<Long> ids){
         // 删除套餐同时也要删除套餐关系表中所关联的菜品，因此需要操作两张表
         setmealService.removeWithDish(ids);
@@ -110,6 +125,8 @@ public class SetmealController {
 
     // 根据条件查询套餐数据
     @GetMapping("/list")
+    // 使用springcache注解缓存套餐数据,value是指缓存的名称，某一类缓存; key是redis中键的名称,需要人为指定，和当前的查询条件有关系，是一个动态拼出来的key,根据查询条件定
+    @Cacheable(value = "setmealCache", key = "#setmeal.categoryId + '_' + #setmeal.status")
     public Result<List<Setmeal>> save(Setmeal setmeal){
         // 构建条件查询器
         LambdaQueryWrapper<Setmeal> lqw = new LambdaQueryWrapper<>();

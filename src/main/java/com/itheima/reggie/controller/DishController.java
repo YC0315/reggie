@@ -13,6 +13,9 @@ import com.itheima.reggie.service.DishService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
@@ -39,6 +42,9 @@ public class DishController {
     // 要操做Redis，需要注入RedisTemplate对象
     @Autowired
     private RedisTemplate redisTemplate;
+
+    // 改造操作redis的方式，使用注解去操作缓存
+    private CacheManager cacheManager;
 
     // 新增菜品
     @PostMapping
@@ -100,6 +106,7 @@ public class DishController {
 
     // 根据id查询对应的菜品信息和口味信息
     @GetMapping("/{id}")
+    //@Cacheable(value = "dishCache", key = "#id")  // 在方法执行前spring先查看缓存中是否有数据如果有则直接返回缓存数据，如果没有，调用方法并将方法的返回值放入缓存中
     public Result<DishDto> get(@PathVariable Long id){
 
         DishDto dishDto = dishService.getByIdWithFlavor(id);
@@ -108,6 +115,7 @@ public class DishController {
 
     // 更新菜品
     @PutMapping
+    // @CacheEvict(value = "dishCache", key = "#dishDto.id")  // 将菜品信息从缓存中删除
     public Result<String> update(@RequestBody DishDto dishDto){  // 用一个封装类去接受参数，原本的catetory类不能接受了，因为属性和字段对不上，提交过来的是json,要加@RequestBody
         log.info(dishDto.toString());
         dishService.updateWithFlavor(dishDto); // 调用业务逻辑层接口

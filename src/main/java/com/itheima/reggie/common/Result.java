@@ -2,12 +2,13 @@ package com.itheima.reggie.common;
 
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
 // 通用的返回给前端的结果类，响应的结果都会封装成此对象返回给前端
 @Data
-public class Result<T> {
+public class Result<T> implements Serializable {  // 要实现序列化接口
 
     private Integer code; //编码：1成功，0和其它数字为失败
 
