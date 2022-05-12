@@ -1,38 +1,57 @@
+
+
+
 server:
   port: 8080
 spring:
   application:
+    #应用的名称，可选
     name: reggie_take_out
-  #Redis相关配置
+  shardingsphere:
+    datasource:
+      names:
+        master,slave
+      # 主数据源
+      master:
+        type: com.alibaba.druid.pool.DruidDataSource
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        #url: jdbc:mysql://192.168.138.100:3306/reggie?characterEncoding=utf-8
+        url: jdbc:mysql://localhost:3306/reggie?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
+        username: root
+        password: yc12138**
+      # 从数据源
+      slave:
+        type: com.alibaba.druid.pool.DruidDataSource
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        #url: jdbc:mysql://192.168.138.101:3306/reggie?characterEncoding=utf-8
+        url: jdbc:mysql://localhost:3306/reggie?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
+        username: root
+        password: yc12138**
+    masterslave:
+      # 读写分离配置
+      load-balance-algorithm-type: round_robin #轮询
+      # 最终的数据源名称
+      name: dataSource
+      # 主库数据源名称
+      master-data-source-name: master
+      # 从库数据源名称列表，多个逗号分隔
+      slave-data-source-names: slave
+    props:
+      sql:
+        show: true #开启SQL显示，默认false
+  main:
+    allow-bean-definition-overriding: true
   redis:
-    host: localhost
+    host: 172.17.2.94
     port: 6379
-    database: 0  # Redis启动后默认提供了16个数据库，默认进入第0号数据库
-    jedis:  #spring data redis其实是对jedis的封装
-      #Redis连接池配置
-      pool:
-        max-active: 8
-        max-wait: 1ms
-        max-idle: 8
-        min-idle: 0
+    password: root@123456
+    database: 0
   cache:
     redis:
-      time-to-live: 1800000  # 设置缓存过期时间1800000毫秒，30分钟
-
-
-
-
-
-  datasource:
-    druid:
-      driver-class-name: com.mysql.cj.jdbc.Driver
-      url: jdbc:mysql://localhost:3306/reggie?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
-      username: root
-      password: yc12138**
-  main:
-    banner-mode: off  # 取消springboot的log
+      time-to-live: 1800000 #设置缓存数据的过期时间
 mybatis-plus:
   configuration:
+    #在映射实体或者属性时，将数据库中表名和字段名中的下划线去掉，按照驼峰命名法映射
     #在映射实体或者属性时（这两种都会用到），将数据库中表名和字段名中的下划线去掉，按照驼峰命名法映射
     # 就是说以下true使得mybatisplus可以实现将数据库中的表和实体类对应起来：address_book表名  ---> AdderssBook实体类
     map-underscore-to-camel-case: true
@@ -40,9 +59,5 @@ mybatis-plus:
   global-config:
     db-config:
       id-type: ASSIGN_ID
-    banner: false  # 设定springboot的标识不显示
-
-# 文件上传的根目录
 reggie:
   path: E:\IDEA\IdeaProjects\waimaipic
-

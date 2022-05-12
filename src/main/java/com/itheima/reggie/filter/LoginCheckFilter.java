@@ -39,7 +39,11 @@ public class LoginCheckFilter implements Filter {  // 实现filter接口
                 "/front/**",
                 "/common/**",
                 "user/sendMsg",
-                "user/login"
+                "user/login",
+                "/doc.html",
+                "/webjars/**",
+                "/swagger-resources",
+                "/v2/api-docs"
         };
 
         //2、判断本次请求是否需要处理，本次请求的url是否匹配上了以上写的不应该处理的url请求
