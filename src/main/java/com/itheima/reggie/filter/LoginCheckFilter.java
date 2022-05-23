@@ -36,7 +36,7 @@ public class LoginCheckFilter implements Filter {  // 实现filter接口
                 "/employee/login",
                 "/employee.logout",
                 "/backend/**",
-                "/front/**",
+                //"/front/**",
                 "/common/**",
                 "user/sendMsg",
                 "user/login",

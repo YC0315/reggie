@@ -93,13 +93,37 @@ public class ShoppingCartController {
      */
     @DeleteMapping("/clean")
     public Result<String> clean(){
-        //SQL:delete from shopping_cart where user_id = ?
 
-        LambdaQueryWrapper<ShoppingCart> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(ShoppingCart::getUserId,BaseContext.getCurrentId());
-
-        shoppingCartService.remove(queryWrapper);
+        shoppingCartService.clean();
 
         return Result.success("清空购物车成功");
     }
+
+    // 手机端减少购物车中的菜品或套餐的数量，前端传过来的是菜品和订单的id
+    @PostMapping("/sub")
+    public Result<String> dropNumber(@RequestBody ShoppingCart shoppingCart) {
+
+        Long dishId = shoppingCart.getDishId();
+        //设置条件构造器
+        LambdaQueryWrapper<ShoppingCart> lqw = new LambdaQueryWrapper<>();
+        //如果减少的是菜品的数量
+        if (dishId != null) {
+            lqw.eq(ShoppingCart::getDishId, dishId);
+            //getOne方法最终得到的是 实体类对象
+            ShoppingCart shoppingCart1 = shoppingCartService.getOne(lqw);
+            shoppingCart1.setNumber(shoppingCart1.getNumber() - 1); // 减少购物车菜品的数量
+            shoppingCartService.updateById(shoppingCart1);
+            return Result.success("操作成功！");
+        }
+        Long setmealId = shoppingCart.getSetmealId();
+        if (setmealId != null) {
+            lqw.eq(ShoppingCart::getSetmealId, setmealId);
+            ShoppingCart shoppingCart2 = shoppingCartService.getOne(lqw);
+            shoppingCart2.setNumber(shoppingCart2.getNumber() - 1);
+            shoppingCartService.updateById(shoppingCart2);
+            return Result.success("操作成功！");
+        }
+        return Result.error("操作失败！");
+    }
+
 }

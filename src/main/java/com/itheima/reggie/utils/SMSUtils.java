@@ -12,29 +12,24 @@ import com.aliyuncs.profile.DefaultProfile;
  */
 public class SMSUtils {
 
-	/**
-	 * 发送短信
-	 * @param signName 签名
-	 * @param templateCode 模板
-	 * @param phoneNumbers 手机号
-	 * @param param 参数
-	 */
-	public static void sendMessage(String signName, String templateCode,String phoneNumbers,String param){
-		DefaultProfile profile = DefaultProfile.getProfile("cn-hangzhou", "", "");
-		IAcsClient client = new DefaultAcsClient(profile);
 
-		SendSmsRequest request = new SendSmsRequest();
-		request.setSysRegionId("cn-hangzhou");
-		request.setPhoneNumbers(phoneNumbers);
-		request.setSignName(signName);
-		request.setTemplateCode(templateCode);
-		request.setTemplateParam("{\"code\":\""+param+"\"}");
-		try {
-			SendSmsResponse response = client.getAcsResponse(request);
-			System.out.println("短信发送成功");
-		}catch (ClientException e) {
-			e.printStackTrace();
-		}
-	}
+    public static void sendMessage(){
+        DefaultProfile profile = DefaultProfile.getProfile("cn-hangzhou", "LTAI5tAyUVnUyxHvVto3GKjv", "G78fKCV3QdOoJAyxaiDu3csRnWAMtj");
+        IAcsClient client = new DefaultAcsClient(profile);
 
+        SendSmsRequest request = new SendSmsRequest();
+        request.setSysRegionId("cn-hangzhou");
+        request.setSignName("阿里云短信测试");
+        request.setTemplateCode("SMS_154950909");
+        request.setPhoneNumbers("17865313980");
+        request.setTemplateParam("{\"code\":\"1234\"}");
+        try {
+            SendSmsResponse response = client.getAcsResponse(request);
+            System.out.println("短信发送成功");
+        }catch (ClientException e) {
+            e.printStackTrace();
+        }
+    }
 }
+
+

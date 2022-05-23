@@ -54,7 +54,7 @@ public class EmployController {
             return Result.error("用户已禁用，请用其他账号登录！");
         }
 
-        //6、登录成功，将员工id存入Session并返回登录成功结果
+        //6、登录成功，将当前登录用户的id存入Session并返回登录成功结果
         Request.getSession().setAttribute("employee", emp.getId());
 
         // 查询成功，返回查询到的对象
@@ -88,7 +88,7 @@ public class EmployController {
         employee.setCreateTime(LocalDateTime.now());
         // 新增用户的更新时间
         employee.setUpdateTime(LocalDateTime.now());
-        // 获得当前用户的id
+        // 获得当前已经登录用户的id
         Long empId = (Long) request.getSession().getAttribute("employee");
         // 新增用户的创建人以及更新人
         employee.setCreateUser(empId);
@@ -127,7 +127,7 @@ public class EmployController {
     }
 
     // 更新操作，根据员工id修改信息,由于传过来的是json数据，因此要使用@RequestBody进行转换。启用禁用是更新用户信息，编辑员工信息也是更新用户信息
-    @PutMapping  // 没有子路径，只请求到/employee，因此不需要写子路径
+    @PutMapping  // 没有子路径，只请求到/employee，因此不需要写子路径，接受实体类以后直接更新数据库就行，参数已经修改过了
     public Result<String> update(HttpServletRequest request , @RequestBody Employee employee){
 
         // 设置更新时间以及更新人
@@ -143,7 +143,7 @@ public class EmployController {
 
     // 编辑员工信息时，要先将员工的信息显示在复选框中再去修改，修改完提交时，还是调用的上面的update方法，UPDATE employee SET username=?, name=?, password=?, phone=?, sex=?, id_number=?, status=?, create_time=?, update_time=?, create_user=?, update_user=? WHERE id=?
     @GetMapping("/{id}")  // 不要将""里面的内容写错了，/在{}的外面，里面是参数
-    public Result<Employee> getById(@PathVariable Long id){ // @PathVariable能使传过来的参数绑定到方法的参数上
+    public Result<Employee> getById(@PathVariable Long id){ // @PathVariable能使传过来的参数绑定到方法的参数上,Request URL: http://localhost:8080/employee/1522841912667844609,没有id=
 
         log.info("根据id查询员工信息。。");
         //SELECT id,username,name,password,phone,sex,id_number,status,create_time,update_time,create_user,update_user FROM employee WHERE id=?

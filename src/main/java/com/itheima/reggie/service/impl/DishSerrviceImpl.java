@@ -2,7 +2,7 @@ package com.itheima.reggie.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.itheima.reggie.common.Result;
+import com.itheima.reggie.common.CustomException;
 import com.itheima.reggie.domain.Dish;
 import com.itheima.reggie.domain.DishFlavor;
 import com.itheima.reggie.dto.DishDto;
@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service  // spring注入的是接口名，但是在容器里寻找的是接口的实现类new出来的bean对象
 @Slf4j
@@ -37,9 +36,10 @@ public class DishSerrviceImpl extends ServiceImpl<DishMapper, Dish> implements D
         // 获得菜品口味
         List<DishFlavor> flavors = dishDto.getFlavors();
         //给每一个菜品填充id值
-        for(DishFlavor dishFlavor:flavors){
+        for (DishFlavor dishFlavor : flavors) {
             dishFlavor.setDishId(dishid);
-        };
+        }
+        ;
 
         /*flavors = flavors.stream().map((item) -> {
             item.setDishId(dishid);
@@ -49,7 +49,8 @@ public class DishSerrviceImpl extends ServiceImpl<DishMapper, Dish> implements D
         dishFlavorService.saveBatch(flavors);
 
     }
-    //根据id查询菜品信息和对应的口味信息,查两张表
+
+    //根据id查询菜品信息和对应的口味信息,查两张表，修改菜品-1.回显菜品
     @Override
     public DishDto getByIdWithFlavor(Long id) {
         // 查询菜品信息，dish表
@@ -61,21 +62,18 @@ public class DishSerrviceImpl extends ServiceImpl<DishMapper, Dish> implements D
 
         // 查询菜品对应的口味信息，dish_falvor表
         LambdaQueryWrapper<DishFlavor> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(DishFlavor::getDishId,dish.getId());  // 从口味表中查询菜品（id）对应的口味（id）
+        lqw.eq(DishFlavor::getDishId, dish.getId());  // 从口味表中查询菜品（id）对应的口味（id）
         List<DishFlavor> flavors = dishFlavorService.list(lqw);
-
         dishDto.setFlavors(flavors);
-
-
         return dishDto;
     }
 
-    // 更新修改菜品信息以及口味信息
+    // 更新修改菜品信息以及口味信息，修改菜品-2.回显菜品后保存更新菜品
     @Override
     @Transactional  // 操作多张表要开启注解保证操作一致性
     public void updateWithFlavor(DishDto dishDto) {
 
-        // 更新菜皮表信息
+        // 更新菜品表信息
         this.updateById(dishDto);
         // 清理原有的口味表中的口味 delete from dish_falvor where dis_id = ???;
         //查询dish_id对应的口味
@@ -87,10 +85,52 @@ public class DishSerrviceImpl extends ServiceImpl<DishMapper, Dish> implements D
         List<DishFlavor> flavors = dishDto.getFlavors();
         // 给每一个口味信息添加一个dish_id
         //给每一个菜品填充id值
-        for(DishFlavor dishFlavor:flavors){
+        for (DishFlavor dishFlavor : flavors) {
             dishFlavor.setDishId(dishDto.getId());
-        };
+        }
         dishFlavorService.saveBatch(flavors); // 将口味传进去保存
+
+    }
+
+    // 批量菜品停售
+    @Override
+    // @RequestParam将请求参数绑定到你controller的方法参数上
+    public void updateStatus(List<Long> ids) {
+
+        for (Long id : ids) {
+            Dish dishServiceById = this.getById(id);
+            dishServiceById.setStatus(0);
+            this.updateById(dishServiceById);
+        }
+    }
+
+    // 批量菜品起售
+    @Override
+    public void updatestartStatus(List<Long> ids) {
+        for (Long id : ids) {
+            Dish dishServiceById = this.getById(id);
+            dishServiceById.setStatus(1);
+            this.updateById(dishServiceById);
+        }
+    }
+
+    // 批量删除套餐
+    @Override
+    public void delssoles(List<Long> ids) {
+        // 设置条件构造器
+        LambdaQueryWrapper<Dish> lqw = new LambdaQueryWrapper<>();
+        //设置查询条件
+        //找出ids的菜品
+        lqw.in(Dish::getId, ids);
+        //查看是否是起售状态
+        lqw.eq(Dish::getStatus, 1);
+        int count = this.count(lqw);  // 查询是否有菜品正在售卖
+
+        if(count>0){
+            throw new CustomException("菜品正在售卖，无法删除！");
+        }
+
+        this.removeByIds(ids);
 
     }
 }

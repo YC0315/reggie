@@ -14,8 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
@@ -52,15 +50,14 @@ public class DishController {
         log.info(dishDto.toString());
         dishService.saveWithFlavor(dishDto); // 调用业务逻辑层接口
 
-
         // 改造：清理所有菜品的缓存数据
-        //Set keys = redisTemplate.keys("dish_*");  // 获得所有以dish_开头的key，表示所有菜品类别的缓存
-        //redisTemplate.delete(keys);
+        Set keys = redisTemplate.keys("dish_*");  // 获得所有以dish_开头的key，表示所有菜品类别的缓存
+        redisTemplate.delete(keys);
 
         // 或者精确的清理，更新哪个类别的菜品就清理哪个菜品的缓存
         //动态的生成key
-        String key = "dish_" + dishDto.getCategoryId() + "_" + dishDto.getStatus();
-        redisTemplate.delete(key);
+        //String key = "dish_" + dishDto.getCategoryId() + "_" + dishDto.getStatus();
+        //redisTemplate.delete(key);
 
         return Result.success("新增菜品成功！");
     }
@@ -100,6 +97,7 @@ public class DishController {
         }).collect(Collectors.toList());
 
         dishDtoPage.setRecords(list);
+        System.out.println(dishDtoPage.toString());
 
         return Result.success(dishDtoPage); // 返回一个分页构造器对象
     }
@@ -108,7 +106,6 @@ public class DishController {
     @GetMapping("/{id}")
     //@Cacheable(value = "dishCache", key = "#id")  // 在方法执行前spring先查看缓存中是否有数据如果有则直接返回缓存数据，如果没有，调用方法并将方法的返回值放入缓存中
     public Result<DishDto> get(@PathVariable Long id){
-
         DishDto dishDto = dishService.getByIdWithFlavor(id);
         return Result.success(dishDto);
     }
@@ -128,9 +125,7 @@ public class DishController {
         //动态的生成key
         String key = "dish_" + dishDto.getCategoryId() + "_" + dishDto.getStatus();
         redisTemplate.delete(key);
-
-
-        return Result.success("新增菜品成功！");
+        return Result.success("更新菜品成功！");
     }
 
 
@@ -212,6 +207,28 @@ public class DishController {
         redisTemplate.opsForValue().set(key, dishDtoList, 60, TimeUnit.MINUTES);
 
         return Result.success(dishDtoList);
+    }
+
+
+    // 批量菜品停售
+    @PostMapping("/status/0")
+    public Result<String> stopsole(@RequestParam List<Long> ids) {
+        dishService.updateStatus(ids);
+        return Result.success("停售成功！");
+    }
+
+    // 批量菜品起售
+    @PostMapping("/status/1")
+    public Result<String> startsole(@RequestParam List<Long> ids) {
+        dishService.updatestartStatus(ids);
+        return Result.success("停售成功！");
+    }
+
+    // 批量菜品删除
+    @DeleteMapping
+    public Result<String> delsole(@RequestParam List<Long> ids){
+        dishService.delssoles(ids);
+        return Result.success("删除成功！");
     }
 
 

@@ -53,8 +53,6 @@ public class jedisTest {
         for(String key:keys){
             System.out.println(key);
         }
-
-
     }
 
 }

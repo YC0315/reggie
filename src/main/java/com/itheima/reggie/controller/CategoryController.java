@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.itheima.reggie.common.Result;
 import com.itheima.reggie.domain.Category;
-import com.itheima.reggie.mapper.CategoryMappper;
 import com.itheima.reggie.service.CategoryService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,9 +51,8 @@ public class CategoryController {
 
     // 删除菜品分类或者套餐分类
     @DeleteMapping
-    public Result<String> delete(Long ids){
-        //categoryService.removeById(ids);
-        categoryService.remove(ids);
+    public Result<String> delete(Long id){  // 这里形参的名字，尽量和前端传参过来的参数名称一致！！！！
+        categoryService.removeById(id);
         return Result.success("分类删除成功！");
     }
 

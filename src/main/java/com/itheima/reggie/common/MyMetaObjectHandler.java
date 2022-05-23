@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 
 // 公共字段填充类
+//定义元数据对象处理器，即定义一个类，实现MetaObjectHandler类（注意将类加上@Component注解）
 @Component
 @Slf4j
 public class MyMetaObjectHandler implements MetaObjectHandler {
