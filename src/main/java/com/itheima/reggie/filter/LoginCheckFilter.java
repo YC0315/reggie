@@ -36,10 +36,10 @@ public class LoginCheckFilter implements Filter {  // 实现filter接口
                 "/employee/login",
                 "/employee.logout",
                 "/backend/**",
-                //"/front/**",
+                "/front/**",
                 "/common/**",
-                "user/sendMsg",
-                "user/login",
+                "/user/sendMsg",
+                "/user/login",
                 "/doc.html",
                 "/webjars/**",
                 "/swagger-resources",
@@ -59,25 +59,24 @@ public class LoginCheckFilter implements Filter {  // 实现filter接口
         if(Request.getSession().getAttribute("employee")  != null){  // 判断用户是否已经登录，用户 已经登录的话会有一个唯一的标识
 
             // 保存当前线程中登录用户的id,用来动态的自动填充字段
+            log.info("用户已登录，用户id为：{}",Request.getSession().getAttribute("employee"));
             Long employeeid = (Long) Request.getSession().getAttribute("employee");
             BaseContext.setCurrentId(employeeid);
-
             filterChain.doFilter(Request, Response);// 放行，有操作的话，一定要在放行之前
             return;
         }
 
         //4-2、判断登录状态，如果已登录，则直接放行
         if(Request.getSession().getAttribute("user") != null){
-            log.info("用户已登录，用户id为：{}",Request.getSession().getAttribute("user"));
-
+            //log.info("用户已登录，用户id为：{}",Request.getSession().getAttribute("user"));
             Long userId = (Long)Request.getSession().getAttribute("user");
             BaseContext.setCurrentId(userId);
-
             filterChain.doFilter(Request,Response);
             return;
         }
 
         //5、如果未登录则返回未登录结果，通过输出流方式向客户端页面响应数据,前端会自动跳转，因此只需要满足前端的要求即可
+        log.info("用户未登录");
         Response.getWriter().write(JSON.toJSONString(Result.error("NOTLOGIN")));  // 前端要的是一个json数据，要将打印的消息封装到Result里然后转换成JSON
         return;
     }

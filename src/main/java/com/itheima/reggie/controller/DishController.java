@@ -17,6 +17,7 @@ import org.springframework.cache.CacheManager;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
+import javax.sql.DataSource;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -43,6 +44,10 @@ public class DishController {
 
     // 改造操作redis的方式，使用注解去操作缓存
     private CacheManager cacheManager;
+
+    // 数据源
+    @Autowired
+    private DataSource dataSource;
 
     // 新增菜品
     @PostMapping
@@ -118,13 +123,13 @@ public class DishController {
         dishService.updateWithFlavor(dishDto); // 调用业务逻辑层接口
 
         // 改造：清理所有菜品的缓存数据
-        //Set keys = redisTemplate.keys("dish_*");  // 获得所有以dish_开头的key，表示所有菜品类别的缓存
-        //redisTemplate.delete(keys);
+        Set keys = redisTemplate.keys("dish_*");  // 获得所有以dish_开头的key，表示所有菜品类别的缓存
+        redisTemplate.delete(keys);
 
         // 或者精确的清理，更新哪个类别的菜品就清理哪个菜品的缓存
         //动态的生成key
-        String key = "dish_" + dishDto.getCategoryId() + "_" + dishDto.getStatus();
-        redisTemplate.delete(key);
+        //String key = "dish_" + dishDto.getCategoryId() + "_" + dishDto.getStatus();
+        //redisTemplate.delete(key);
         return Result.success("更新菜品成功！");
     }
 
@@ -213,6 +218,9 @@ public class DishController {
     // 批量菜品停售
     @PostMapping("/status/0")
     public Result<String> stopsole(@RequestParam List<Long> ids) {
+        // 清理所有菜品的缓存数据,涉及写操作的都要清除缓存
+        Set keys = redisTemplate.keys("dish_*");  // 获得所有以dish_开头的key，表示所有菜品类别的缓存
+        redisTemplate.delete(keys);
         dishService.updateStatus(ids);
         return Result.success("停售成功！");
     }
@@ -220,6 +228,9 @@ public class DishController {
     // 批量菜品起售
     @PostMapping("/status/1")
     public Result<String> startsole(@RequestParam List<Long> ids) {
+        // 清理所有菜品的缓存数据
+        Set keys = redisTemplate.keys("dish_*");  // 获得所有以dish_开头的key，表示所有菜品类别的缓存
+        redisTemplate.delete(keys);
         dishService.updatestartStatus(ids);
         return Result.success("停售成功！");
     }
@@ -227,6 +238,10 @@ public class DishController {
     // 批量菜品删除
     @DeleteMapping
     public Result<String> delsole(@RequestParam List<Long> ids){
+        // 清理所有菜品的缓存数据
+        Set keys = redisTemplate.keys("dish_*");  // 获得所有以dish_开头的key，表示所有菜品类别的缓存
+        redisTemplate.delete(keys);
+
         dishService.delssoles(ids);
         return Result.success("删除成功！");
     }

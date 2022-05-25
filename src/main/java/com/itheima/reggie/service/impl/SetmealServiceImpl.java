@@ -82,10 +82,6 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> impl
 
         // 删除关系表中对应的菜品
         setmealDishService.remove(lqw1);
-
-
-
-
     }
 
     // 套餐批量停售

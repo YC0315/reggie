@@ -48,11 +48,11 @@
             <artifactId>spring-boot-starter-cache</artifactId>
         </dependency>
         <!--为了实现读写分离，导入sharding-JDBC坐标-->
-        <!--<dependency>
+        <dependency>
             <groupId>org.apache.shardingsphere</groupId>
             <artifactId>sharding-jdbc-spring-boot-starter</artifactId>
             <version>4.0.0-RC1</version>
-        </dependency>-->
+        </dependency>
         <!--导入knife4j坐标，扩展了swagger-->
         <dependency>
             <groupId>com.github.xiaoymin</groupId>

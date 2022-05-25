@@ -5,10 +5,14 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.itheima.reggie.common.CustomException;
 import com.itheima.reggie.domain.Dish;
 import com.itheima.reggie.domain.DishFlavor;
+import com.itheima.reggie.domain.Setmeal;
+import com.itheima.reggie.domain.SetmealDish;
 import com.itheima.reggie.dto.DishDto;
 import com.itheima.reggie.mapper.DishMapper;
 import com.itheima.reggie.service.DishFlavorService;
 import com.itheima.reggie.service.DishService;
+import com.itheima.reggie.service.SetmealDishService;
+import com.itheima.reggie.service.SetmealService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +27,12 @@ public class DishSerrviceImpl extends ServiceImpl<DishMapper, Dish> implements D
 
     @Autowired
     private DishFlavorService dishFlavorService;  // 用来操作口味表
+
+    @Autowired
+    private SetmealDishService setmealDishService;
+
+    @Autowired
+    private SetmealService setmealService;
 
     // 由于要操作两张表，因此这里要加入事务控制
     @Override
@@ -114,7 +124,7 @@ public class DishSerrviceImpl extends ServiceImpl<DishMapper, Dish> implements D
         }
     }
 
-    // 批量删除套餐
+    // 批量删除菜品
     @Override
     public void delssoles(List<Long> ids) {
         // 设置条件构造器
@@ -130,6 +140,20 @@ public class DishSerrviceImpl extends ServiceImpl<DishMapper, Dish> implements D
             throw new CustomException("菜品正在售卖，无法删除！");
         }
 
+        // 查询套餐菜品关系表，如果有正在售卖的套餐包含该菜品，则无法删除
+        //查询该菜品所在的套餐id
+        LambdaQueryWrapper<SetmealDish> lqw1 = new LambdaQueryWrapper<>();
+        lqw1.in(SetmealDish::getDishId, ids);
+        List<SetmealDish> setmealDishList = setmealDishService.list(lqw1);
+
+        for(SetmealDish setmealDish : setmealDishList){
+            Long setmealId = setmealDish.getSetmealId();
+            Setmeal setmealServiceById = setmealService.getById(setmealId);
+            if(setmealServiceById.getStatus() != 0){
+                String name = setmealServiceById.getName();
+                throw new CustomException("请先停售"+ name);
+            }
+        }
         this.removeByIds(ids);
 
     }

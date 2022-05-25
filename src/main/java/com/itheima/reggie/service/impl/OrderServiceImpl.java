@@ -48,6 +48,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Orders> implement
     public void submit(Orders orders) {
         //获得当前用户id,用户登录时已经将员工id存入Session中了
         Long userId = BaseContext.getCurrentId();
+        //Long userId = (Long) session.getAttribute("user");
 
         //查询当前用户的购物车数据
         LambdaQueryWrapper<ShoppingCart> wrapper = new LambdaQueryWrapper<>();
@@ -86,16 +87,15 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Orders> implement
             return orderDetail;
         }).collect(Collectors.toList());
 
-
         orders.setId(orderId);
         orders.setOrderTime(LocalDateTime.now());
         orders.setCheckoutTime(LocalDateTime.now());
         orders.setStatus(2);
         orders.setAmount(new BigDecimal(amount.get()));//总金额
-        orders.setUserId(userId);
+        orders.setUserId(BaseContext.getCurrentId());
         orders.setNumber(String.valueOf(orderId));
         //orders.setUserName(user.getName());  // 没有username
-        orders.setUserName("yc");
+        orders.setUserName(user.getPhone());
         orders.setConsignee(addressBook.getConsignee());
         orders.setPhone(addressBook.getPhone());
         orders.setAddress((addressBook.getProvinceName() == null ? "" : addressBook.getProvinceName())
@@ -134,13 +134,14 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Orders> implement
         shoppingCartService.clean();
 
         // 获取当前用户的id
-        Long currentId = BaseContext.getCurrentId();
+        Long uderID = BaseContext.getCurrentId();
+        //Long uderID = (Long) session.getAttribute("user");
 
         List<ShoppingCart> shoppingCarts = orderDetails.stream().map((item)->{
             //将订单表和订单明细表中的数据赋值给购物车对象
             ShoppingCart shoppingCart = new ShoppingCart();
             shoppingCart.setName(item.getName());
-            shoppingCart.setUserId(currentId);
+            shoppingCart.setUserId(uderID);
             if(item.getDishId() != null){
                 shoppingCart.setDishId(item.getDishId());
             }else{
@@ -156,7 +157,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Orders> implement
         //添加购物车数据实体到购物车
         shoppingCartService.saveBatch(shoppingCarts);
     }
-
 
     // 服务端查看用户订单
     @Override
@@ -193,7 +193,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Orders> implement
 
         //设置条件构造器
         LambdaQueryWrapper<Orders> lqw = new LambdaQueryWrapper<>();
-        //设置查询条件
+        //设置查询条件,查询当前用户的订单，其他用户的订单不应该显示在这setmeal
         lqw.eq(Orders::getUserId, BaseContext.getCurrentId());
         //设置排序条件
         lqw.orderByDesc(Orders::getOrderTime);

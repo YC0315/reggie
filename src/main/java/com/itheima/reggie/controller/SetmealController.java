@@ -73,6 +73,7 @@ public class SetmealController {
 
     //套餐批量停售
     @PostMapping("/status/0")
+    @CacheEvict(value = "setmealCache", allEntries = true)
     public Result<String> stopsole(@RequestParam List<Long> ids) {  // 多个请求参数时要加@RequestParam注解
         setmealService.stopsoles(ids);
         return Result.success("套餐批量停售成功！");
@@ -80,6 +81,7 @@ public class SetmealController {
 
     //套餐批量起售
     @PostMapping("/status/1")
+    @CacheEvict(value = "setmealCache", allEntries = true)
     public Result<String> startsole(@RequestParam List<Long> ids) {  // 多个请求参数时要加@RequestParam注解
         setmealService.startsoles(ids);
         return Result.success("套餐批量起售成功！");
@@ -131,6 +133,7 @@ public class SetmealController {
 
     // 修改套餐-2.修改保存
     @PutMapping
+    @CacheEvict(value = "setmealCache", allEntries = true)
     public Result<String> updata(@RequestBody SetmealDto setmealDto){
         Result<String> stringResult = setmealService.SetmealWithDish(setmealDto);
         return stringResult;
