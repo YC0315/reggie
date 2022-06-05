@@ -45,7 +45,7 @@ public class DishController {
     // 改造操作redis的方式，使用注解去操作缓存
     private CacheManager cacheManager;
 
-    // 数据源
+    // 使用了shardingjdbc的数据源
     @Autowired
     private DataSource dataSource;
 
