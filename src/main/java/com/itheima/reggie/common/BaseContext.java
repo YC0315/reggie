@@ -8,7 +8,6 @@ public class BaseContext {
     // 保存值
     public static void setCurrentId(Long id){ threadLocal.set(id);
     }
-
     // 获取值
     public static Long getCurrentId(){
         return threadLocal.get();
