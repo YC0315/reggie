@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Configuration;
 
 // mybatisplus分页插件
 @Configuration
-public class MybatisPlusConfig {
+public class  MybatisPlusConfig {
     // 通过拦截器的方式将分页插件加进来
     @Bean
     public MybatisPlusInterceptor mybatisPlusInterceptor(){

@@ -235,7 +235,11 @@ public class DishController {
         return Result.success("停售成功！");
     }
 
-    // 批量菜品删除
+    /**
+     * 批量菜品删除
+     * @param ids
+     * @return
+     */
     @DeleteMapping
     public Result<String> delsole(@RequestParam List<Long> ids){
         // 清理所有菜品的缓存数据
@@ -245,6 +249,7 @@ public class DishController {
         dishService.delssoles(ids);
         return Result.success("删除成功！");
     }
+
 
 
 }
