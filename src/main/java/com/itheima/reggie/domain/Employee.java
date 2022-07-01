@@ -2,26 +2,34 @@ package com.itheima.reggie.domain;
 
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
 // 员工实体类 @Data注解表示在创建实体类时再也不用自己手写set和get和toString方法了，只需要提供私有属性即可
 @Data
+@ApiModel("用户类")
 public class Employee implements Serializable {
 
     private static final long serialVersionUID = 1L;
-
+    @ApiModelProperty("用户名id")
     private Long id;  // mybatisplus中整型都是Long类型的必须要加L
 
+    @ApiModelProperty("用户名")
     private String username;
 
     private String name;
 
+    @ApiModelProperty("用户密码")
     private String password;
 
+    @ApiModelProperty("用户手机号")
     private String phone;
 
+    @ApiModelProperty("用户性别")
     private String sex;
 
     private String idNumber;

@@ -40,10 +40,12 @@ public class LoginCheckFilter implements Filter {  // 实现filter接口
                 "/common/**",
                 "/user/sendMsg",
                 "/user/login",
+
                 "/doc.html",
                 "/webjars/**",
-                "/swagger-resources",
-                "/v2/api-docs"
+                "/swagger-resources/**",
+                "/v2/**",
+                "/swagger-ui.html/**"
         };
 
         //2、判断本次请求是否需要处理，本次请求的url是否匹配上了以上写的不应该处理的url请求
@@ -66,7 +68,7 @@ public class LoginCheckFilter implements Filter {  // 实现filter接口
             return;
         }
 
-        //4-2、判断登录状态，如果已登录，则直接放行
+        //4-2、判断登录状态，如果已登录，则直接放行,从session中取出用户信息保存用户信息到ThreadLocal里面
         if(Request.getSession().getAttribute("user") != null){
             //log.info("用户已登录，用户id为：{}",Request.getSession().getAttribute("user"));
             Long userId = (Long)Request.getSession().getAttribute("user");

@@ -3,18 +3,12 @@ package com.itheima.reggie.config;
 import com.github.xiaoymin.knife4j.spring.annotations.EnableKnife4j;
 import com.itheima.reggie.common.JacksonObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
-import springfox.documentation.builders.ApiInfoBuilder;
-import springfox.documentation.builders.PathSelectors;
-import springfox.documentation.builders.RequestHandlerSelectors;
-import springfox.documentation.service.ApiInfo;
-import springfox.documentation.spi.DocumentationType;
-import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 import java.util.List;
@@ -25,6 +19,7 @@ import java.util.List;
 @EnableSwagger2 // 开启swagger文档功能
 @EnableKnife4j
 public class WebMvcConfig extends WebMvcConfigurationSupport  {
+
 
     // 重写方法，设置静态资源映射，比如浏览器请求的是http://localhost:8080/backend/index.html，此时就会映射到backend下的index.html文件
     @Override
@@ -38,6 +33,10 @@ public class WebMvcConfig extends WebMvcConfigurationSupport  {
         registry.addResourceHandler("/webjars/**").addResourceLocations("classpath:/META-INF/resources/webjars/");
         registry.addResourceHandler("/backend/**").addResourceLocations("classpath:/backend/");
         registry.addResourceHandler("/front/**").addResourceLocations("classpath:/front/");
+
+        // 增加对swagger页面的访问
+        registry.addResourceHandler("swagger-ui.html").addResourceLocations(
+                "classpath:/META-INF/resources/");
     }
 
     // 扩展springmvc提供的消息框架的转换器,设置自己的消息类型转换器，重写设置消息类型转换方法,将Long型数据转换成String类型，避免Long型数据精度丢失问题（最长16位）
@@ -51,23 +50,23 @@ public class WebMvcConfig extends WebMvcConfigurationSupport  {
         converters.add(0, mh);
     }
 
-    @Bean
-    public Docket createRestApi() {
-        // 文档类型
-        return new Docket(DocumentationType.SWAGGER_2)
-                .apiInfo(apiInfo())
-                .select()
-                .apis(RequestHandlerSelectors.basePackage("com.itheima.reggie.controller"))
-                .paths(PathSelectors.any())
-                .build();
-    }
-
-    private ApiInfo apiInfo() {
-        return new ApiInfoBuilder()
-                .title("瑞吉外卖")
-                .version("1.0")
-                .description("瑞吉外卖接口文档")
-                .build();
-    }
+//    @Bean
+//    public Docket createRestApi() {
+//        // 文档类型
+//        return new Docket(DocumentationType.SWAGGER_2)
+//                .apiInfo(apiInfo())
+//                .select()
+//                .apis(RequestHandlerSelectors.basePackage("com.itheima.reggie.controller"))
+//                .paths(PathSelectors.any())
+//                .build();
+//    }
+//
+//    private ApiInfo apiInfo() {
+//        return new ApiInfoBuilder()
+//                .title("瑞吉外卖")
+//                .version("1.0")
+//                .description("瑞吉外卖接口文档")
+//                .build();
+//    }
 }
 

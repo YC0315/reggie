@@ -5,6 +5,9 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.itheima.reggie.common.Result;
 import com.itheima.reggie.domain.Employee;
 import com.itheima.reggie.service.EmployeeService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.DigestUtils;
@@ -12,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
-
+@Api("这是一个员工管理类")// 增加swagger接口注释
 @Slf4j  // 添加日志方便调试
 @RestController  // 添加Rest风格的Controller注解
 @RequestMapping("/employee")  // 设定请求路径的父路径
@@ -23,6 +26,8 @@ public class EmployController {
     private EmployeeService employeeService;
 
     // 编写登录方法
+    @ApiOperation("用户登录方法")
+    @ApiImplicitParam(paramType = "body")
     @PostMapping("/login")  // 前端发送的是一个post请求，所以使用postmapping,子路径就是/login,这样当有登录请求时就会调用这个login()方法
     public Result<Object> login(HttpServletRequest Request, @RequestBody Employee employee) {
         // post请求由于前端传入的是一个json数据，因此接受时要使用@RequestBody进行转换，并封装到employee实体中
@@ -55,6 +60,7 @@ public class EmployController {
         }
 
         //6、登录成功，将当前登录用户的id存入Session并返回登录成功结果
+        // 将用户信息存入session后面会取出来放入thread local中
         Request.getSession().setAttribute("employee", emp.getId());
 
         // 查询成功，返回查询到的对象

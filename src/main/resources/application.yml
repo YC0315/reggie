@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 8081
 
 
 spring:
@@ -8,16 +8,24 @@ spring:
     name: reggie_take_out
     #Redis相关配置
   redis:
-      host: localhost
-      port: 6379
-      database: 0  # Redis启动后默认提供了16个数据库，默认进入第0号数据库
-      jedis:  #spring data redis其实是对jedis的封装
-        #Redis连接池配置
-        pool:
-          max-active: 8
-          max-wait: 1ms
-          max-idle: 8
-          min-idle: 0
+    # 单机配置
+    #host: localhost
+    #port: 6379
+    #database: 0  # Redis启动后默认提供了16个数据库，默认进入第0号数据库
+    #jedis:  #spring data redis其实是对jedis的封装
+    #Redis连接池配置
+    #pool:
+    # max-active: 8
+    # max-wait: 1ms
+    # max-idle: 8
+    # min-idle: 0
+    # 集群配置,使用时需要提前开启三个redis一主两从,再开启三个哨兵
+      sentinel:
+        master: mymaster
+        nodes:
+        - 127.0.0.1:26379  # ip:sentinel端口
+        - 127.0.0.1:27001
+        - 127.0.0.1:27002
 
   # spring shardingjdbc读写分离的配置，基于数据库的主从复制
   shardingsphere:
@@ -35,7 +43,7 @@ spring:
       slave:
         type: com.alibaba.druid.pool.DruidDataSource
         driver-class-name: com.mysql.cj.jdbc.Driver
-        url: jdbc:mysql://10.121.18.137:3306/reggie?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
+        url: jdbc:mysql://10.27.77.231:3306/reggie?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
         username: root
         password: yc12138**
     masterslave:
@@ -70,3 +78,8 @@ mybatis-plus:
     banner: false  # 设定springboot的标识不显示
 reggie:
   path: D:\waimaipic\
+logging:
+  level:
+    io.lettuce.core: debug
+  pattern:
+    dateformat: MM-dd HH:mm:ss:SSS

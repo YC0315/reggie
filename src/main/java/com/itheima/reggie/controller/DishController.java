@@ -1,5 +1,6 @@
 package com.itheima.reggie.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.itheima.reggie.common.Result;
@@ -14,7 +15,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import javax.sql.DataSource;
@@ -109,7 +113,7 @@ public class DishController {
 
     // 根据id查询对应的菜品信息和口味信息
     @GetMapping("/{id}")
-    //@Cacheable(value = "dishCache", key = "#id")  // 在方法执行前spring先查看缓存中是否有数据如果有则直接返回缓存数据，如果没有，调用方法并将方法的返回值放入缓存中
+    @Cacheable(value = "dishCache", key = "#id")  // 在方法执行前spring先查看缓存中是否有数据如果有则直接返回缓存数据，如果没有，调用方法并将方法的返回值放入缓存中
     public Result<DishDto> get(@PathVariable Long id){
         DishDto dishDto = dishService.getByIdWithFlavor(id);
         return Result.success(dishDto);
@@ -117,7 +121,7 @@ public class DishController {
 
     // 更新菜品
     @PutMapping
-    // @CacheEvict(value = "dishCache", key = "#dishDto.id")  // 将菜品信息从缓存中删除
+    @CacheEvict(value = "dishCache", key = "#dishDto.id")  // 将菜品信息从缓存中删除
     public Result<String> update(@RequestBody DishDto dishDto){  // 用一个封装类去接受参数，原本的catetory类不能接受了，因为属性和字段对不上，提交过来的是json,要加@RequestBody
         log.info(dishDto.toString());
         dishService.updateWithFlavor(dishDto); // 调用业务逻辑层接口
@@ -157,6 +161,8 @@ public class DishController {
     }*/
 
     @GetMapping("/list")
+    // 这一个@Cacheable就可以代替下面手动写入缓存和从缓存中取出
+    //@Cacheable(value = "CategoryCache", key = "#dish.getCategoryId() + '_' + #dish.getStatus()")
     public Result<List<DishDto>> list(Dish dish){
 
         ///改造
@@ -164,7 +170,8 @@ public class DishController {
         List<DishDto> dishDtoList = null;
         //动态的构造一个"Key"
         String key = "dish_" + dish.getCategoryId() + "_" +dish.getStatus();
-        dishDtoList = (List<DishDto>) redisTemplate.opsForValue().get(key); // 获取到的是一个List对象，是每个分类的菜品
+        dishDtoList = (List<DishDto>) redisTemplate.opsForValue().get(key);
+        // 获取到的是一个List对象，是每个分类的菜品
 
         // 如果存在数据则直接返回，无需查询数据库
         if(dishDtoList != null){
@@ -210,7 +217,6 @@ public class DishController {
 
         //将查询到的菜品数据缓存到Redis中,存60分钟
         redisTemplate.opsForValue().set(key, dishDtoList, 60, TimeUnit.MINUTES);
-
         return Result.success(dishDtoList);
     }
 

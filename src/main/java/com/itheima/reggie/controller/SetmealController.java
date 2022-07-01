@@ -44,7 +44,6 @@ public class SetmealController {
 
     // 新增套餐
     @PostMapping  // 不要忘了加@RequestBody
-
     // 当新增套餐时，需要将缓存数据一块清理掉,否则会使缓存和数据库中的数据不一致。value = "setmealCache"就是指我要删除的是setmealCache这个分类下面的缓存
     // allEntries = true表示要删除setmealCache这个分类下面的所有缓存数据
     @CacheEvict(value = "setmealCache", allEntries = true)//@CacheEvict 就是一个触发器，在每次调用被它注解的方法时，就会触发删除它指定的缓存的动作
@@ -133,7 +132,7 @@ public class SetmealController {
 
     // 修改套餐-2.修改保存
     @PutMapping
-    @CacheEvict(value = "setmealCache", allEntries = true)
+    @CacheEvict(value = "setmealCache", allEntries = true)  // 删除缓存
     public Result<String> updata(@RequestBody SetmealDto setmealDto){
         Result<String> stringResult = setmealService.SetmealWithDish(setmealDto);
         return stringResult;
