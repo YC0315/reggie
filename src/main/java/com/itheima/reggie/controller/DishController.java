@@ -54,10 +54,12 @@ public class DishController {
     private DataSource dataSource;
 
     // 新增菜品
+    // 用一个封装类去接受参数，拥有原本的catetory类之外的属性
     @PostMapping
-    public Result<String> save(@RequestBody DishDto dishDto){  // 用一个封装类去接受参数，原本的catetory类不能接受了，因为属性和字段对不上，提交过来的是json,要加@RequestBody
+    public Result<String> save(@RequestBody DishDto dishDto){
         log.info(dishDto.toString());
-        dishService.saveWithFlavor(dishDto); // 调用业务逻辑层接口
+        // 调用业务逻辑层接口
+        dishService.saveWithFlavor(dishDto);
 
         // 改造：清理所有菜品的缓存数据
         Set keys = redisTemplate.keys("dish_*");  // 获得所有以dish_开头的key，表示所有菜品类别的缓存
@@ -160,18 +162,18 @@ public class DishController {
 
     }*/
 
+    /*
+     * 这一个@Cacheable就可以代替下面手动写入缓存和从缓存中取出
+     * @Cacheable(value = "CategoryCache", key = "#dish.getCategoryId() + '_' + #dish.getStatus()")
+     **/
     @GetMapping("/list")
-    // 这一个@Cacheable就可以代替下面手动写入缓存和从缓存中取出
-    //@Cacheable(value = "CategoryCache", key = "#dish.getCategoryId() + '_' + #dish.getStatus()")
     public Result<List<DishDto>> list(Dish dish){
-
-        ///改造
         // 根据分类id先从缓存中取数据,缓存的是什么，是一个List<DishDto>
         List<DishDto> dishDtoList = null;
         //动态的构造一个"Key"
         String key = "dish_" + dish.getCategoryId() + "_" +dish.getStatus();
-        dishDtoList = (List<DishDto>) redisTemplate.opsForValue().get(key);
         // 获取到的是一个List对象，是每个分类的菜品
+        dishDtoList = (List<DishDto>) redisTemplate.opsForValue().get(key);
 
         // 如果存在数据则直接返回，无需查询数据库
         if(dishDtoList != null){
