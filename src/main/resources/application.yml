@@ -48,7 +48,7 @@ spring:
         username: root
         password: yc12138**
     masterslave:
-      #读写分离配置,负载均衡，加入有多个从库，挨个依次排队查询
+      #读写分离配置,如果有多个从库，依次排队查询
       load-balance-algorithm-type: round_robin
       #最终的数据库名称
       name: dataSource
